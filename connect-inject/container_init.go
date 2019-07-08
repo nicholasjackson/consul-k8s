@@ -173,9 +173,6 @@ services {
   kind = "connect-proxy"
   address = "${POD_IP}"
   port = 20000
-	{{- if .Tags}}
-  tags = {{.Tags}}
-	{{- end}}
 
   proxy {
     destination_service_name = "{{ .ServiceName }}"
@@ -222,6 +219,9 @@ services {
   name = "{{ .ServiceName }}"
   address = "${POD_IP}"
   port = {{ .ServicePort }}
+	{{- if .Tags}}
+  tags = {{.Tags}}
+	{{- end}}
 }
 EOF
 
