@@ -62,7 +62,7 @@ func (h *Handler) containerInit(pod *corev1.Pod) (corev1.Container, error) {
 
 		// remove trailing ,
 		data.Tags = strings.Trim(data.Tags, ", ")
-		data.Tags = data.Tags + "]"
+		data.Tags = fmt.Sprintf("%s]", data.Tags)
 	}
 
 	// If upstreams are specified, configure those
@@ -219,9 +219,9 @@ services {
   name = "{{ .ServiceName }}"
   address = "${POD_IP}"
   port = {{ .ServicePort }}
-	{{- if .Tags}}
+  {{- if .Tags}}
   tags = {{.Tags}}
-	{{- end}}
+  {{- end}}
 }
 EOF
 
