@@ -2,7 +2,7 @@ package connectinject
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
 	"strings"
 	"text/template"
 
@@ -54,15 +54,10 @@ func (h *Handler) containerInit(pod *corev1.Pod) (corev1.Container, error) {
 	if raw, ok := pod.Annotations[annotationTags]; ok && raw != "" {
 		tags := strings.Split(raw, ",")
 
-		data.Tags = "["
-
-		for _, t := range tags {
-			data.Tags = data.Tags + fmt.Sprintf("\"%s\", ", t)
+		d, err := json.Marshal(tags)
+		if err == nil {
+			data.Tags = string(d)
 		}
-
-		// remove trailing ,
-		data.Tags = strings.Trim(data.Tags, ", ")
-		data.Tags = fmt.Sprintf("%s]", data.Tags)
 	}
 
 	// If upstreams are specified, configure those

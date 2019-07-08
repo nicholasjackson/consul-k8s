@@ -143,7 +143,7 @@ func TestHandlerContainerInit(t *testing.T) {
 				pod.Annotations[annotationTags] = "abc,123"
 				return pod
 			},
-			`tags = ["abc", "123"]`,
+			`tags = ["abc","123"]`,
 			"",
 		},
 
