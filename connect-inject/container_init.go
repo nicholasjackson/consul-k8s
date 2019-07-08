@@ -2,6 +2,7 @@ package connectinject
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"text/template"
 
@@ -15,6 +16,7 @@ type initContainerCommandData struct {
 	AuthMethod      string
 	CentralConfig   bool
 	Upstreams       []initContainerCommandUpstreamData
+	Tags            string
 }
 
 type initContainerCommandUpstreamData struct {
@@ -45,6 +47,22 @@ func (h *Handler) containerInit(pod *corev1.Pod) (corev1.Container, error) {
 		if port, _ := portValue(pod, raw); port > 0 {
 			data.ServicePort = port
 		}
+	}
+
+	// If tags are specified split the string into an array and create
+	// the tags string
+	if raw, ok := pod.Annotations[annotationTags]; ok && raw != "" {
+		tags := strings.Split(raw, ",")
+
+		data.Tags = "["
+
+		for _, t := range tags {
+			data.Tags = data.Tags + fmt.Sprintf("\"%s\", ", t)
+		}
+
+		// remove trailing ,
+		data.Tags = strings.Trim(data.Tags, ", ")
+		data.Tags = data.Tags + "]"
 	}
 
 	// If upstreams are specified, configure those
@@ -155,6 +173,9 @@ services {
   kind = "connect-proxy"
   address = "${POD_IP}"
   port = 20000
+	{{- if .Tags}}
+  tags = {{.Tags}}
+	{{- end}}
 
   proxy {
     destination_service_name = "{{ .ServiceName }}"
