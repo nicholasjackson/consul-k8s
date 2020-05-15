@@ -29,10 +29,16 @@ type initContainerCommandData struct {
 	Upstreams                 []initContainerCommandUpstreamData
 	Tags                      string
 	Meta                      map[string]string
+	WASMFilters               []wasmFilter
 
 	// The PEM-encoded CA certificate to use when
 	// communicating with Consul clients
 	ConsulCACert string
+}
+
+type wasmFilter struct {
+	Name     string
+	Location string
 }
 
 type initContainerCommandUpstreamData struct {
@@ -106,6 +112,19 @@ func (h *Handler) containerInit(pod *corev1.Pod, k8sNamespace string) (corev1.Co
 	for k, v := range pod.Annotations {
 		if strings.HasPrefix(k, annotationMeta) && strings.TrimPrefix(k, annotationMeta) != "" {
 			data.Meta[strings.TrimPrefix(k, annotationMeta)] = v
+		}
+	}
+
+	// If there are WASM filters specified split into an array and create.
+	data.WASMFilters = make([]wasmFilter, 0)
+	for k, v := range pod.Annotations {
+		if strings.HasPrefix(k, annotationWASMFilter) && strings.TrimPrefix(k, annotationWASMFilter) != "" {
+			data.WASMFilters = append(data.WASMFilters,
+				wasmFilter{
+					Name:     strings.TrimPrefix(k, annotationWASMFilter),
+					Location: v,
+				},
+			)
 		}
 	}
 
@@ -272,7 +291,19 @@ services {
     {{- if (gt .ServicePort 0) }}
     local_service_address = "127.0.0.1"
     local_service_port = {{ .ServicePort }}
-    {{- end }}
+		{{- end }}
+		config {
+  		{{- if .WASMFilters}}
+			wasm_filters = [
+			{{- range .WASMFilters }}
+  	  	{
+  	     	name = "{{ .Name }}"
+  	      location = "{{ .Location }}"
+  	    },
+			{{- end}}
+  	  ]
+			{{- end}}
+		}
     {{- range .Upstreams }}
     upstreams {
       {{- if .Name }}

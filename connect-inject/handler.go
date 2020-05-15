@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/go-hclog"
 	"github.com/mattbaird/jsonpatch"
@@ -71,6 +71,12 @@ const (
 	// registration. This is specified in the format `<key>:<value>`
 	// e.g. consul.hashicorp.com/service-meta-foo:bar
 	annotationMeta = "consul.hashicorp.com/service-meta-"
+
+	// annotationWASMFitler is a list of WASM fitlters to apply to the
+	// proxies HTTP filter chain.
+	// This is specified in the format `<name>:<location>`
+	// e.g. consul.hashicorp.com/connect-wasm-filter-filtername:/filters/optimized.wasm
+	annotationWASMFilter = "consul.hashicorp.com/connect-wasm-filter-"
 
 	// annotationSyncPeriod controls the -sync-period flag passed to the
 	// consul-k8s lifecycle-sidecar command. This flag controls how often the
