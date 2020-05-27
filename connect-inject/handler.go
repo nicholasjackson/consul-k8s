@@ -34,6 +34,12 @@ const (
 	// be set to a truthy or falsy value, as parseable by strconv.ParseBool
 	annotationInject = "consul.hashicorp.com/connect-inject"
 
+	// annotationImage is the key of the annotation that controls whether
+	// a custom Envoy image is used for the sidecar.
+	// This can be used with the connect-wasm-filter annotation to enable
+	// custom WASM filters for the sidecar.
+	annotationImage = "consul.hashicorp.com/connect-inject-image"
+
 	// annotationService is the name of the service to proxy. This defaults
 	// to the name of the first container.
 	annotationService = "consul.hashicorp.com/connect-service"
@@ -72,10 +78,13 @@ const (
 	// e.g. consul.hashicorp.com/service-meta-foo:bar
 	annotationMeta = "consul.hashicorp.com/service-meta-"
 
-	// annotationWASMFitler is a list of WASM fitlters to apply to the
+	// annotationWASMFilter is a list of WASM fitlters to apply to the
 	// proxies HTTP filter chain.
 	// This is specified in the format `<name>:<location>`
 	// e.g. consul.hashicorp.com/connect-wasm-filter-filtername:/filters/optimized.wasm
+	// Location is a valid path within the sidecar container `consul-connect-envoy-sidecar`
+	// A custom sidecar which bundles Envoy and your WASM fitlers can be specified by using
+	// the annotation `consul.hashicorp.com/connect-inject-image`
 	annotationWASMFilter = "consul.hashicorp.com/connect-wasm-filter-"
 
 	// annotationSyncPeriod controls the -sync-period flag passed to the

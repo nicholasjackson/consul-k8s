@@ -28,9 +28,17 @@ func (h *Handler) envoySidecar(pod *corev1.Pod, k8sNamespace string) (corev1.Con
 		return corev1.Container{}, err
 	}
 
+	// set the default Envoy image
+	imageEnvoy := h.ImageEnvoy
+
+	// if the user has specified an annotation override the default image
+	if raw, ok := pod.Annotations[annotationImage]; ok && raw != "" {
+		imageEnvoy = raw
+	}
+
 	container := corev1.Container{
 		Name:  "consul-connect-envoy-sidecar",
-		Image: h.ImageEnvoy,
+		Image: imageEnvoy,
 		Env: []corev1.EnvVar{
 			{
 				Name: "HOST_IP",
